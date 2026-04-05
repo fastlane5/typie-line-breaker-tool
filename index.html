@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문장 단위 줄바꿈 도구</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600&display=swap');
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="min-h-screen py-10 px-4">
+    <div class="max-w-3xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">문장 단위 줄바꿈 도구</h1>
+            <p class="text-gray-600">에디터 특성에 맞춰 빈 줄을 완벽하게 유지하는 복사 도구입니다.</p>
+        </div>
+
+        <div class="flex flex-col gap-8">
+            <!-- Input Section -->
+            <div class="flex flex-col">
+                <label class="font-semibold text-gray-700 mb-2 ml-1">원본 텍스트 입력</label>
+                <textarea 
+                    id="inputText" 
+                    class="w-full h-64 p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all shadow-sm resize-none text-base"
+                    placeholder="여기에 글을 붙여넣으세요..."
+                ></textarea>
+            </div>
+
+            <!-- Divider -->
+            <div class="flex justify-center items-center">
+                <div class="h-px bg-gray-200 flex-grow"></div>
+                <div class="px-4 text-gray-400 font-bold">변환 및 복사</div>
+                <div class="h-px bg-gray-200 flex-grow"></div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="flex justify-center">
+                <button 
+                    id="copyBrunchBtn"
+                    class="w-full max-w-md bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-4 rounded-xl transition-all shadow-md flex flex-col items-center gap-1 transform active:scale-95"
+                >
+                    <span>브런치용 서식 복사</span>
+                    <span class="text-xs font-normal opacity-80">(원본 줄바꿈 유지)</span>
+                </button>
+            </div>
+
+            <!-- Output Preview -->
+            <div class="flex flex-col">
+                <label class="font-semibold text-gray-700 text-lg mb-2 px-1">미리보기 (브런치용 서식 적용 상태)</label>
+                <div 
+                    id="outputText" 
+                    class="w-full min-h-[15rem] p-6 bg-white border border-gray-200 rounded-2xl overflow-y-auto shadow-inner text-gray-800 leading-relaxed text-base"
+                    style="white-space: pre-wrap;"
+                ></div>
+            </div>
+        </div>
+
+        <!-- Hidden container for rich text copy -->
+        <div id="richTextContainer" contenteditable="true" style="position: fixed; left: -9999px; top: 0;"></div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-8 py-4 rounded-2xl shadow-2xl opacity-0 transition-opacity duration-300 pointer-events-none z-50">
+            복사되었습니다! 브런치 에디터에 붙여넣어 보세요.
+        </div>
+    </div>
+
+    <script>
+        const inputArea = document.getElementById('inputText');
+        const outputArea = document.getElementById('outputText');
+        const copyBrunchBtn = document.getElementById('copyBrunchBtn');
+        const richTextContainer = document.getElementById('richTextContainer');
+        const toast = document.getElementById('toast');
+
+        const ZWSP = "\u200B";
+
+        // 미리보기 업데이트 (브런치용 서식인 '원본 유지' 모드를 시각화)
+        function updatePreview() {
+            const rawText = inputArea.value;
+            // 브런치용 서식은 원본 줄바꿈을 그대로 유지하므로 원본 텍스트를 출력합니다.
+            outputArea.textContent = rawText;
+        }
+
+        inputArea.addEventListener('input', updatePreview);
+
+        // 변환 및 복사 함수
+        function processAndCopy() {
+            const rawText = inputArea.value;
+            if (!rawText) return;
+
+            // 브런치용 모드: 원본 줄바꿈(1줄 등) 유지
+            const result = rawText;
+
+            const finalLines = result.split('\n');
+            richTextContainer.innerHTML = "";
+
+            finalLines.forEach(line => {
+                const p = document.createElement('p');
+                p.style.margin = "0px";
+                p.style.padding = "0px";
+                p.style.lineHeight = "1.6";
+
+                // 빈 줄이거나 공백만 있는 줄인 경우 폭 없는 공백(ZWSP) 삽입하여 구조 유지
+                if (line.trim() === "") {
+                    p.innerHTML = ZWSP;
+                } else {
+                    p.innerText = line;
+                }
+                richTextContainer.appendChild(p);
+            });
+
+            // 복사 실행을 위한 선택 로직
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(richTextContainer);
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            try {
+                // Rich Text 서식 복사를 위해 execCommand('copy') 사용
+                document.execCommand('copy');
+                showToast();
+            } catch (err) {
+                console.error("복사 오류:", err);
+            }
+            selection.removeAllRanges();
+        }
+
+        copyBrunchBtn.addEventListener('click', processAndCopy);
+
+        function showToast() {
+            toast.classList.remove('opacity-0');
+            setTimeout(() => toast.classList.add('opacity-0'), 2000);
+        }
+    </script>
+</body>
+</html>
