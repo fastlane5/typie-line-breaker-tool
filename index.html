@@ -6,67 +6,109 @@
     <title>문장 단위 줄바꿈 도구</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600&display=swap');
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         body {
             font-family: 'Pretendard', sans-serif;
-            background-color: #f8fafc;
+            background-color: #f1f5f9; /* slate-100 */
+        }
+        /* 스크롤바 커스텀 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
     </style>
 </head>
-<body class="min-h-screen py-10 px-4">
-    <div class="max-w-3xl mx-auto">
+<body class="min-h-screen py-8 md:py-12 px-4 md:px-8 text-slate-800">
+    <div class="max-w-3xl mx-auto space-y-8">
+        
         <!-- Header -->
-        <div class="text-center mb-10">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">문장 단위 줄바꿈 도구</h1>
-            <p class="text-gray-600">에디터 특성에 맞춰 빈 줄을 완벽하게 유지하는 복사 도구입니다.</p>
-        </div>
+        <header class="text-center space-y-3">
+            <div class="inline-flex items-center justify-center p-3 bg-emerald-100 rounded-full mb-2">
+                <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+            </div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">문장 단위 줄바꿈 도구</h1>
+            <p class="text-slate-500">브런치 등의 에디터에서 빈 줄이 사라지지 않도록 원본 줄바꿈을 완벽하게 유지해 줍니다.</p>
+        </header>
 
-        <div class="flex flex-col gap-8">
+        <main class="flex flex-col gap-6 md:gap-8">
             <!-- Input Section -->
-            <div class="flex flex-col">
-                <label class="font-semibold text-gray-700 mb-2 ml-1">원본 텍스트 입력</label>
+            <section class="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
+                <div class="flex justify-between items-end mb-4">
+                    <label for="inputText" class="font-bold text-slate-700">원본 텍스트</label>
+                    <div class="flex gap-3 md:gap-4 text-xs md:text-sm text-slate-500 font-medium">
+                        <span>글자수: <span id="charCount" class="text-emerald-600">0</span></span>
+                        <span>단어수: <span id="wordCount" class="text-emerald-600">0</span></span>
+                        <span>줄 수: <span id="lineCount" class="text-emerald-600">0</span></span>
+                    </div>
+                </div>
                 <textarea 
                     id="inputText" 
-                    class="w-full h-64 p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all shadow-sm resize-none text-base"
-                    placeholder="여기에 글을 붙여넣으세요..."
+                    class="w-full h-64 md:h-80 p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 focus:outline-none transition-all resize-none text-base leading-relaxed"
+                    placeholder="여기에 복사할 글을 붙여넣으세요..."
                 ></textarea>
-            </div>
+                
+                <div class="mt-4 flex flex-wrap gap-2 md:gap-3">
+                    <button 
+                        id="removeMdBtn"
+                        class="px-4 py-3 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition-colors focus:ring-2 focus:ring-slate-200 focus:outline-none flex-shrink-0 text-sm md:text-base"
+                        title="마크다운 기호만 지우기"
+                    >
+                        마크다운 제거
+                    </button>
+                    <button 
+                        id="clearBtn"
+                        class="px-4 py-3 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition-colors focus:ring-2 focus:ring-slate-200 focus:outline-none flex-shrink-0 text-sm md:text-base"
+                        title="전체 초기화"
+                    >
+                        지우기
+                    </button>
+                    <button 
+                        id="copyBrunchBtn"
+                        class="flex-grow bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-3 rounded-xl transition-transform transform active:scale-[0.98] shadow-sm flex items-center justify-center gap-2 focus:ring-4 focus:ring-emerald-100 focus:outline-none text-sm md:text-base"
+                    >
+                        <svg class="w-5 h-5 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                        </svg>
+                        브런치 등의 에디터용 서식 복사
+                    </button>
+                </div>
+            </section>
 
-            <!-- Divider -->
-            <div class="flex justify-center items-center">
-                <div class="h-px bg-gray-200 flex-grow"></div>
-                <div class="px-4 text-gray-400 font-bold">변환 및 복사</div>
-                <div class="h-px bg-gray-200 flex-grow"></div>
-            </div>
-
-            <!-- Action Button -->
-            <div class="flex justify-center">
-                <button 
-                    id="copyBrunchBtn"
-                    class="w-full max-w-md bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-4 rounded-xl transition-all shadow-md flex flex-col items-center gap-1 transform active:scale-95"
-                >
-                    <span>브런치용 서식 복사</span>
-                    <span class="text-xs font-normal opacity-80">(원본 줄바꿈 유지)</span>
-                </button>
-            </div>
-
-            <!-- Output Preview -->
-            <div class="flex flex-col">
-                <label class="font-semibold text-gray-700 text-lg mb-2 px-1">미리보기 (브런치용 서식 적용 상태)</label>
+            <!-- Output Preview Section -->
+            <section class="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
+                <div class="mb-4">
+                    <label class="font-bold text-slate-700">미리보기</label>
+                    <p class="text-sm text-slate-500 mt-1">실제 에디터에 붙여넣기 될 형태입니다.</p>
+                </div>
                 <div 
                     id="outputText" 
-                    class="w-full min-h-[15rem] p-6 bg-white border border-gray-200 rounded-2xl overflow-y-auto shadow-inner text-gray-800 leading-relaxed text-base"
-                    style="white-space: pre-wrap;"
+                    class="w-full h-48 md:h-64 p-4 bg-slate-50 border border-slate-200 rounded-xl overflow-y-auto text-slate-800 text-base"
+                    style="white-space: pre-wrap; line-height: 1.6;"
                 ></div>
-            </div>
-        </div>
+            </section>
+        </main>
 
         <!-- Hidden container for rich text copy -->
-        <div id="richTextContainer" contenteditable="true" style="position: fixed; left: -9999px; top: 0;"></div>
+        <div id="richTextContainer" contenteditable="true" style="position: absolute; left: -9999px; top: -9999px;"></div>
 
         <!-- Toast Notification -->
-        <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-8 py-4 rounded-2xl shadow-2xl opacity-0 transition-opacity duration-300 pointer-events-none z-50">
-            복사되었습니다! 브런치 에디터에 붙여넣어 보세요.
+        <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="font-medium">복사되었습니다! 에디터에 붙여넣어 보세요.</span>
         </div>
     </div>
 
@@ -74,29 +116,86 @@
         const inputArea = document.getElementById('inputText');
         const outputArea = document.getElementById('outputText');
         const copyBrunchBtn = document.getElementById('copyBrunchBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const removeMdBtn = document.getElementById('removeMdBtn');
         const richTextContainer = document.getElementById('richTextContainer');
         const toast = document.getElementById('toast');
+        
+        const charCount = document.getElementById('charCount');
+        const wordCount = document.getElementById('wordCount');
+        const lineCount = document.getElementById('lineCount');
 
         const ZWSP = "\u200B";
 
-        // 미리보기 업데이트 (브런치용 서식인 '원본 유지' 모드를 시각화)
-        function updatePreview() {
+        // 입력될 때마다 미리보기 및 통계 업데이트
+        function handleInput() {
             const rawText = inputArea.value;
-            // 브런치용 서식은 원본 줄바꿈을 그대로 유지하므로 원본 텍스트를 출력합니다.
             outputArea.textContent = rawText;
+            
+            // 통계 계산
+            charCount.textContent = rawText.length.toLocaleString();
+            
+            // 단어 수 계산 (공백 기준)
+            const words = rawText.trim() === '' ? 0 : rawText.trim().split(/\s+/).length;
+            wordCount.textContent = words.toLocaleString();
+            
+            lineCount.textContent = rawText === '' ? 0 : rawText.split('\n').length.toLocaleString();
         }
 
-        inputArea.addEventListener('input', updatePreview);
+        inputArea.addEventListener('input', handleInput);
+
+        // 초기화 버튼 이벤트
+        clearBtn.addEventListener('click', () => {
+            inputArea.value = '';
+            handleInput();
+            inputArea.focus();
+        });
+
+        // 마크다운 제거 함수
+        function removeMarkdown(text) {
+            let result = text;
+            
+            // 1. 헤더 제거 (# Header -> Header)
+            result = result.replace(/^#{1,6}\s+/gm, '');
+            // 2. 인용구 제거 (> Quote -> Quote)
+            result = result.replace(/^\s*>\s+/gm, '');
+            // 3. 리스트 기호 제거 (-, *, + Item -> Item)
+            result = result.replace(/^\s*[-*+]\s+/gm, '');
+            // 4. 숫자 리스트 제거 (1. Item -> Item)
+            result = result.replace(/^\s*\d+\.\s+/gm, '');
+            // 5. 수평선 제거 (---, ***, ___)
+            result = result.replace(/^\s*[-*_]{3,}\s*$/gm, '');
+            // 6. 볼드/이탤릭 기호 제거 (**bold** -> bold) - 텍스트는 남김
+            result = result.replace(/(\*\*|__)(.*?)\1/g, '$2');
+            result = result.replace(/(\*|_)(.*?)\1/g, '$2');
+            // 7. 취소선 기호 제거 (~~strike~~ -> strike)
+            result = result.replace(/~~(.*?)~~/g, '$1');
+            // 8. 코드블록 백틱(```) 전체 제거
+            result = result.replace(/```/g, '');
+            // 9. 인라인 코드 백틱(`) 제거 - 텍스트는 남김
+            result = result.replace(/`(.*?)`/g, '$1');
+            // 10. 링크/이미지 텍스트만 남기기 ([text](url) -> text)
+            result = result.replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1');
+
+            return result;
+        }
+
+        // 마크다운 제거 버튼 이벤트
+        removeMdBtn.addEventListener('click', () => {
+            inputArea.value = removeMarkdown(inputArea.value);
+            handleInput();
+        });
 
         // 변환 및 복사 함수
         function processAndCopy() {
             const rawText = inputArea.value;
-            if (!rawText) return;
+            if (!rawText) {
+                // 내용이 없을 경우 입력창에 포커스
+                inputArea.focus();
+                return;
+            }
 
-            // 브런치용 모드: 원본 줄바꿈(1줄 등) 유지
-            const result = rawText;
-
-            const finalLines = result.split('\n');
+            const finalLines = rawText.split('\n');
             richTextContainer.innerHTML = "";
 
             finalLines.forEach(line => {
@@ -105,7 +204,7 @@
                 p.style.padding = "0px";
                 p.style.lineHeight = "1.6";
 
-                // 빈 줄이거나 공백만 있는 줄인 경우 폭 없는 공백(ZWSP) 삽입하여 구조 유지
+                // 빈 줄이거나 공백만 있는 줄인 경우 폭 없는 공백(ZWSP) 삽입
                 if (line.trim() === "") {
                     p.innerHTML = ZWSP;
                 } else {
@@ -114,7 +213,7 @@
                 richTextContainer.appendChild(p);
             });
 
-            // 복사 실행을 위한 선택 로직
+            // 클립보드에 리치 텍스트 서식으로 복사하기 위해 Selection API 사용
             const selection = window.getSelection();
             const range = document.createRange();
             range.selectNodeContents(richTextContainer);
@@ -122,21 +221,34 @@
             selection.addRange(range);
 
             try {
-                // Rich Text 서식 복사를 위해 execCommand('copy') 사용
+                // iFrame 환경 등에서의 호환성과 Rich Text 복사를 위해 execCommand 사용
                 document.execCommand('copy');
                 showToast();
             } catch (err) {
                 console.error("복사 오류:", err);
+                alert("복사에 실패했습니다. 브라우저 설정을 확인해주세요.");
             }
+            
+            // 선택 해제
             selection.removeAllRanges();
         }
 
         copyBrunchBtn.addEventListener('click', processAndCopy);
 
+        let toastTimeout;
         function showToast() {
             toast.classList.remove('opacity-0');
-            setTimeout(() => toast.classList.add('opacity-0'), 2000);
+            toast.classList.add('opacity-100');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 2500);
         }
+        
+        // 초기 로딩 시 반영
+        handleInput();
     </script>
 </body>
 </html>
